@@ -28,54 +28,39 @@
     body, html {
       margin: 0; padding: 0;
       width: 100vw; height: 100dvh;
-      background-color: #0f172a; /* Warna latar luar game */
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      overflow: hidden;
-      touch-action: none; /* Mencegah layar tertarik / pull to refresh */
+      background-color: #0f172a; 
+      display: flex; justify-content: center; align-items: center;
+      overflow: hidden; touch-action: none; 
     }
 
     #app-container {
-      width: var(--logical-width);
-      height: var(--logical-height);
+      width: var(--logical-width); height: var(--logical-height);
       background-color: var(--bg-color);
-      position: relative;
-      overflow: hidden;
+      position: relative; overflow: hidden;
       transform-origin: center center;
-      /* Box shadow untuk mempercantik tampilan jika di PC */
       box-shadow: 0 0 40px rgba(0,0,0,0.5);
       border-radius: 0px; 
     }
 
     @media (min-width: 480px) {
-      #app-container {
-        border-radius: 20px;
-        border: 8px solid #334155;
-      }
+      #app-container { border-radius: 20px; border: 8px solid #334155; }
     }
 
     .screen {
-      display: none; 
-      width: 100%; height: 100%; 
+      display: none; width: 100%; height: 100%; 
       flex-direction: column; align-items: center; justify-content: center;
       position: absolute; top: 0; left: 0; z-index: 10;
     }
-    
     .screen.active { display: flex; }
 
     .glass-panel {
-      background: var(--panel-bg);
-      padding: 1.5rem;
-      border-radius: 24px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-      width: 90%;
-      backdrop-filter: blur(10px);
+      background: var(--panel-bg); padding: 1.5rem;
+      border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      width: 90%; backdrop-filter: blur(10px);
     }
 
     input {
-      width: 100%; padding: 10px 14px;
-      margin-top: 4px; margin-bottom: 12px;
+      width: 100%; padding: 10px 14px; margin-top: 4px; margin-bottom: 12px;
       border: 2px solid #e2e8f0; border-radius: 12px;
       font-size: 1rem; outline: none; transition: border-color 0.2s;
       user-select: text; -webkit-user-select: text;
@@ -105,33 +90,27 @@
       background: var(--ground-accent); opacity: 0.3;
     }
     
-    /* Ukuran menggunakan Fixed Pixel agar sama persis di semua perangkat */
     #player {
       position: absolute; bottom: 20%; left: 40px;
       width: 60px; height: 60px;
       font-size: 3.5rem; line-height: 60px; text-align: center;
-      z-index: 5;
-      transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+      z-index: 5; transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
     }
     #player.jumping { transform: translateY(-130px); }
     
     #obstacle {
-      position: absolute; bottom: 20%; left: 100%; 
-      z-index: 4;
+      position: absolute; bottom: 20%; left: 100%; z-index: 4;
     }
     
     .obstacle-body {
-      width: 36px; height: 50px;
-      background: #854d0e;
-      border-radius: 18px 18px 0 0;
-      position: relative;
+      width: 36px; height: 50px; background: #854d0e;
+      border-radius: 18px 18px 0 0; position: relative;
     }
     .obstacle-body::after {
       content: ''; position: absolute; top: -10px; left: 20px; width: 10px; height: 24px;
       background: #FCD34D; border-radius: 10px; border: 3px solid white; transform: rotate(10deg);
     }
 
-    /* Animasi absolut (Kiri ke Kanan dari layar 360px). Durasi TETAP */
     @keyframes moveLeft {
       0% { transform: translateX(50px); }
       100% { transform: translateX(-450px); }
@@ -160,10 +139,17 @@
       width: 100%; padding: 12px; margin-bottom: 8px;
       background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 12px;
       font-size: 0.95rem; font-weight: 600; text-align: left; cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.2s; display: flex; align-items: center;
+    }
+    .option-btn .opt-letter {
+      background: #e2e8f0; color: #475569; width: 28px; height: 28px; 
+      display: flex; justify-content: center; align-items: center; 
+      border-radius: 6px; margin-right: 12px; font-weight: 900;
     }
     .option-btn.correct { background: #dcfce7; border-color: #86efac; color: #166534; }
+    .option-btn.correct .opt-letter { background: #22c55e; color: white; }
     .option-btn.wrong { background: #fee2e2; border-color: #fca5a5; color: #991b1b; }
+    .option-btn.wrong .opt-letter { background: #ef4444; color: white; }
     
     #message-box {
       position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
@@ -175,10 +161,7 @@
   </style>
 </head>
 <body>
-
   <div id="app-container">
-    
-    <!-- MESEAGE BOX CUSTOM -->
     <div id="message-box">Pesan</div>
 
     <!-- START SCREEN -->
@@ -200,8 +183,8 @@
           <input type="text" id="input-kelas" placeholder="Contoh: 5A" autocomplete="off">
         </div>
         <div class="mb-4">
-          <label class="block text-xs font-bold text-slate-700">Kode Tab Soal (Dari Guru)</label>
-          <input type="text" id="input-kode" placeholder="Ketik kode sheet..." autocomplete="off">
+          <label class="block text-xs font-bold text-slate-700">Kode Soal (Dari Guru)</label>
+          <input type="text" id="input-kode" placeholder="Misal: KUIS-MTK" autocomplete="off">
         </div>
         
         <button id="btn-start" class="btn-primary" onclick="startGame()">Mulai Bermain</button>
@@ -256,34 +239,30 @@
       <div class="glass-panel text-center">
         <div class="text-5xl mb-3" id="game-over-icon">😿</div>
         <h2 class="text-2xl font-black text-slate-800 mb-1">Permainan Selesai</h2>
-        <div class="bg-blue-50 border border-blue-100 rounded-xl p-3 my-4">
+        <div class="bg-blue-50 border border-blue-100 rounded-xl p-3 my-2">
           <div class="text-xs text-slate-500 font-bold">SKOR AKHIR</div>
           <div id="final-score" class="text-4xl font-black text-blue-600">0</div>
         </div>
+        
+        <div id="submit-status" class="text-xs font-bold mt-3 mb-4 text-slate-500">
+          Menyimpan nilai ke server...
+        </div>
+
         <button class="btn-primary" onclick="resetGame()">Main Lagi</button>
       </div>
     </div>
-
   </div>
 
   <script>
     function scaleContainer() {
       const container = document.getElementById('app-container');
-      const winW = window.innerWidth;
-      const winH = window.innerHeight;
-      
-      // Hitung skala terbaik agar pas di layar tanpa merubah rasio game (360x640)
-      const scaleX = winW / 360;
-      const scaleY = winH / 640;
-      const scale = Math.min(scaleX, scaleY);
-      
+      const scale = Math.min(window.innerWidth / 360, window.innerHeight / 640);
       container.style.transform = `scale(${scale})`;
     }
-    
     window.addEventListener('resize', scaleContainer);
-    scaleContainer(); // Jalankan saat awal render
+    scaleContainer(); 
 
-    // URL Web App GAS Anda
+    // URL Web App GAS Anda secara Spesifik
     const API_URL = "https://script.google.com/macros/s/AKfycby76NuFNTNRW1C7GzwumaBquwQ0sAu02dJJHTNcVWanswuadjzVo-Uz1PomFKaQ0pk/exec";
 
     const DOM = {
@@ -300,11 +279,15 @@
       options: document.getElementById('options-container'),
       finalScore: document.getElementById('final-score'),
       btnStart: document.getElementById('btn-start'),
-      msgBox: document.getElementById('message-box')
+      msgBox: document.getElementById('message-box'),
+      submitStatus: document.getElementById('submit-status')
     };
 
+    // State untuk menampung seluruh variabel
     let state = {
+      nama: "", kelas: "", kode: "",
       score: 0, lives: 3, jumpsCount: 0, jumpsToNextQuestion: 3,
+      benar: 0, salah: 0, startTime: 0, detail: [],
       isJumping: false, gameLoop: null, obstaclePassed: false,
       questions: [], currentQuestion: null, isPaused: false,
       obstacleSpeed: 1.5
@@ -317,44 +300,36 @@
     }
 
     async function fetchQuestions(kode) {
-      // Fallback Data untuk mencegah Game Over jika Fetching gagal/timeout
       const fallbackData = [
-        { pertanyaan: "1 + 1 = ?", opsi: ["1", "2", "3", "4"], jawaban: "2", poin: 10 },
-        { pertanyaan: "Warna langit di siang hari?", opsi: ["Merah", "Biru", "Kuning", "Hijau"], jawaban: "Biru", poin: 10 },
-        { pertanyaan: "Hewan apa yang mengeong?", opsi: ["Anjing", "Kucing", "Sapi", "Ayam"], jawaban: "Kucing", poin: 10 }
+        { id: 1, pertanyaan: "Internet belum tersambung, coba 1+1=?", opsi: [{letter:'A', text:'1'},{letter:'B', text:'2'},{letter:'C', text:'3'},{letter:'D', text:'4'}], jawaban: "B", poin: 10 }
       ];
 
       try {
-        const fetchUrl = `${API_URL}?action=getQuestions&sheetId=${encodeURIComponent(kode)}&kode=${encodeURIComponent(kode)}`;
+        const fetchUrl = `${API_URL}?action=getQuestions&sheetInput=${encodeURIComponent(kode)}&sheetId=${encodeURIComponent(kode)}`;
         const response = await fetch(fetchUrl);
-        
-        // Membaca text mentah dulu agar terhindar dari SyntaxError "Unexpected end of input"
         const textData = await response.text(); 
-        if (!textData || textData.trim() === "") {
-          console.warn("Respons JSON kosong, memakai fallback lokal.");
-          return fallbackData;
-        }
+        
+        if (!textData || textData.trim() === "") throw new Error("Data Kosong");
 
         const result = JSON.parse(textData);
         
-        // Format mapping disesuaikan dengan struktur GAS array baru 
-        if (result && Array.isArray(result) && result.length > 0) {
+        // Memastikan format cocok dengan format backend [id, pertanyaan, A, B, C, D, jawaban, poin]
+        if (Array.isArray(result) && result.length > 0) {
             return result.map(q => ({
-                pertanyaan: q.pertanyaan || q[1],
-                opsi: [q.a || q[2], q.b || q[3], q.c || q[4], q.d || q[5]].filter(Boolean),
-                jawaban: q.jawaban || q[6],
-                poin: q.poin || q[7] || 10
-            }));
-        } else if (result.status === 'success' && result.data) {
-            return result.data.map(q => ({
-                pertanyaan: q[1],
-                opsi: [q[2], q[3], q[4], q[5]].filter(Boolean),
-                jawaban: q[6],
-                poin: q[7] || 10
+                id: q.id || Math.random(),
+                pertanyaan: q.pertanyaan,
+                opsi: [
+                    { letter: 'A', text: q.a },
+                    { letter: 'B', text: q.b },
+                    { letter: 'C', text: q.c },
+                    { letter: 'D', text: q.d }
+                ].filter(opt => opt.text !== undefined && opt.text !== ""),
+                // Memastikan jawaban dirubah menjadi uppercase (A, B, C, atau D)
+                jawaban: q.jawaban ? q.jawaban.toString().trim().toUpperCase() : 'A',
+                poin: parseInt(q.poin) || 10
             }));
         }
-        
-        throw new Error("Data tidak lengkap");
+        throw new Error("Format tidak valid");
       } catch (error) {
         console.error("API Fetch Error:", error);
         return fallbackData;
@@ -369,15 +344,16 @@
     }
 
     async function startGame() {
-      const nama = document.getElementById('input-nama').value.trim();
-      const kode = document.getElementById('input-kode').value.trim();
+      state.nama = document.getElementById('input-nama').value.trim();
+      state.kelas = document.getElementById('input-kelas').value.trim();
+      state.kode = document.getElementById('input-kode').value.trim();
       
-      if (!nama) return showMsg("Silakan isi nama kamu!");
+      if (!state.nama) return showMsg("Silakan isi nama kamu!");
 
-      DOM.btnStart.textContent = "Memuat Soal...";
+      DOM.btnStart.textContent = "Memuat Soal dari Server...";
       DOM.btnStart.disabled = true;
 
-      state.questions = await fetchQuestions(kode);
+      state.questions = await fetchQuestions(state.kode);
       state.questions.sort(() => Math.random() - 0.5); // Acak soal
       
       DOM.btnStart.textContent = "Mulai Bermain";
@@ -390,6 +366,8 @@
 
     function resetGameState() {
       state.score = 0; state.lives = 3; state.jumpsCount = 0;
+      state.benar = 0; state.salah = 0; state.detail = [];
+      state.startTime = Date.now();
       state.isPaused = false; state.obstacleSpeed = 1.5;
       updateUI(); renderLives();
       
@@ -401,8 +379,6 @@
       if (state.isJumping || state.isPaused) return;
       state.isJumping = true;
       DOM.player.classList.add('jumping');
-      
-      // Tunggu animasi naik+turun sesuai CSS Transform (.35s)
       setTimeout(() => {
         DOM.player.classList.remove('jumping');
         setTimeout(() => { state.isJumping = false; }, 350); 
@@ -425,9 +401,7 @@
 
       const pBox = DOM.player.getBoundingClientRect();
       const oBox = DOM.obstacle.getBoundingClientRect();
-      
-      // Toleransi Hitbox agar adil
-      const hitToleransi = 10;
+      const hitToleransi = 15;
       
       const isColliding = !(
         pBox.right - hitToleransi < oBox.left || 
@@ -439,31 +413,21 @@
       if (isColliding) {
         handleHit();
       } else {
-        // Karena resolusi di-scale (CSS transform), getBoundingClientRect merespon presisi
-        // Jika rintangan telah melewati Player sepenuhnya
         if (oBox.right < pBox.left && !state.obstaclePassed) {
           state.obstaclePassed = true;
-          state.jumpsCount++;
-          updateUI();
-          
+          state.jumpsCount++; updateUI();
           if (state.jumpsCount >= state.jumpsToNextQuestion) {
             setTimeout(triggerQuestion, 200);
           }
         }
-        
-        // Reset state jika rintangan hilang dari layar bagian kiri
-        // Karena menggunakan Fixed Resolution, 0 adalah batas presisi paling kiri
-        if (oBox.right < 0) {
-           state.obstaclePassed = false;
-        }
+        if (oBox.right < 0) state.obstaclePassed = false;
       }
     }
 
     function handleHit() {
       state.isPaused = true;
       DOM.obstacle.classList.remove('moving');
-      state.lives--;
-      renderLives();
+      state.lives--; renderLives();
       DOM.player.textContent = "😵";
       
       if (state.lives <= 0) {
@@ -479,9 +443,8 @@
     }
 
     function resetObstacleAndResume() {
-      // Hapus & Terapkan animasi ulang agar mengulang dari awal
       DOM.obstacle.style.animation = 'none';
-      void DOM.obstacle.offsetWidth; // Trigger Reflow
+      void DOM.obstacle.offsetWidth; 
       DOM.obstacle.style.animation = null;
       DOM.obstacle.classList.add('moving');
       state.obstaclePassed = false;
@@ -501,32 +464,45 @@
       DOM.qText.textContent = state.currentQuestion.pertanyaan;
       DOM.options.innerHTML = '';
       
+      // Render opsi A, B, C, D
       state.currentQuestion.opsi.forEach(opt => {
         const btn = document.createElement('button');
-        btn.className = 'option-btn'; btn.textContent = opt;
-        btn.onclick = () => checkAnswer(btn, opt);
+        btn.className = 'option-btn';
+        btn.dataset.letter = opt.letter;
+        btn.innerHTML = `<div class="opt-letter">${opt.letter}</div> <div>${opt.text}</div>`;
+        btn.onclick = () => checkAnswer(btn, opt.letter);
         DOM.options.appendChild(btn);
       });
     }
 
-    function checkAnswer(btn, selected) {
+    function checkAnswer(btn, selectedLetter) {
       const allBtns = document.querySelectorAll('.option-btn');
       allBtns.forEach(b => b.disabled = true);
       
-      const isCorrect = (selected.toString().trim().toLowerCase() === state.currentQuestion.jawaban.toString().trim().toLowerCase());
+      // Mencocokkan berdasarkan Huruf A, B, C, atau D
+      const isCorrect = (selectedLetter === state.currentQuestion.jawaban);
+      
+      // Simpan histori untuk dikirim
+      state.detail.push({
+        id: state.currentQuestion.id,
+        jawaban: selectedLetter,
+        benar: isCorrect
+      });
       
       if (isCorrect) {
         btn.classList.add('correct');
-        state.score += parseInt(state.currentQuestion.poin) || 10;
-        // Game Makin Cepat Dikit
+        state.score += state.currentQuestion.poin;
+        state.benar++;
         if(state.obstacleSpeed > 0.8) {
            state.obstacleSpeed -= 0.05;
            DOM.obstacle.style.animationDuration = state.obstacleSpeed + 's';
         }
       } else {
         btn.classList.add('wrong');
+        state.salah++;
+        // Beri highlight hijau pada jawaban yang sebenarnya benar
         allBtns.forEach(b => {
-          if (b.textContent.trim().toLowerCase() === state.currentQuestion.jawaban.toString().trim().toLowerCase()) {
+          if (b.dataset.letter === state.currentQuestion.jawaban) {
             b.classList.add('correct');
           }
         });
@@ -565,12 +541,52 @@
       DOM.obstacle.classList.remove('moving');
       DOM.finalScore.textContent = state.score;
       switchScreen(DOM.gameOver);
+
+      submitScoreToServer();
+    }
+
+    async function submitScoreToServer() {
+      DOM.submitStatus.textContent = "Menyimpan nilai ke server...";
+      DOM.submitStatus.className = "text-xs font-bold mt-3 mb-4 text-blue-600";
+
+      const durasi = Math.floor((Date.now() - state.startTime) / 1000);
+      
+      // Mengirim POST Sesuai dengan Format Payload di Backend 
+      const payload = {
+        nama: state.nama,
+        kelas: state.kelas,
+        sheetInput: state.kode,
+        skor: state.score,
+        benar: state.benar,
+        salah: state.salah,
+        durasi: durasi,
+        detail: state.detail
+      };
+
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        });
+        const data = await response.json();
+        
+        if(data.success || data.message) {
+            DOM.submitStatus.textContent = "✅ Nilai berhasil disimpan di Sheet!";
+            DOM.submitStatus.className = "text-xs font-bold mt-3 mb-4 text-green-600";
+        } else {
+            throw new Error("Gagal disimpan");
+        }
+      } catch (error) {
+        console.error("Gagal mengirim nilai:", error);
+        DOM.submitStatus.textContent = "❌ Gagal menyimpan. Silakan screenshot nilaimu.";
+        DOM.submitStatus.className = "text-xs font-bold mt-3 mb-4 text-red-600";
+      }
     }
 
     function resetGame() {
       switchScreen(DOM.start);
     }
-
   </script>
 </body>
 </html>
