@@ -54,23 +54,25 @@
     .screen.active { display: flex; }
 
     .glass-panel {
-      background: var(--panel-bg); padding: 1.5rem;
+      background: var(--panel-bg); padding: 1.25rem;
       border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.15);
       width: 90%; backdrop-filter: blur(10px);
+      max-height: 95%; overflow-y: auto;
     }
 
-    input {
-      width: 100%; padding: 10px 14px; margin-top: 4px; margin-bottom: 12px;
+    input, select {
+      width: 100%; padding: 8px 12px; margin-top: 2px; margin-bottom: 8px;
       border: 2px solid #e2e8f0; border-radius: 12px;
-      font-size: 1rem; outline: none; transition: border-color 0.2s;
+      font-size: 0.9rem; outline: none; transition: border-color 0.2s;
+      background: white;
       user-select: text; -webkit-user-select: text;
     }
-    input:focus { border-color: #3b82f6; }
+    input:focus, select:focus { border-color: #3b82f6; }
 
     button.btn-primary {
       width: 100%; background: linear-gradient(135deg, #3b82f6, #2563eb);
-      color: white; border: none; padding: 14px;
-      border-radius: 12px; font-size: 1.1rem; font-weight: bold;
+      color: white; border: none; padding: 12px;
+      border-radius: 12px; font-size: 1rem; font-weight: bold;
       cursor: pointer; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
       transition: transform 0.1s;
     }
@@ -136,15 +138,15 @@
     }
 
     .option-btn {
-      width: 100%; padding: 12px; margin-bottom: 8px;
+      width: 100%; padding: 10px; margin-bottom: 8px;
       background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 12px;
-      font-size: 0.95rem; font-weight: 600; text-align: left; cursor: pointer;
+      font-size: 0.9rem; font-weight: 600; text-align: left; cursor: pointer;
       transition: all 0.2s; display: flex; align-items: center;
     }
     .option-btn .opt-letter {
       background: #e2e8f0; color: #475569; width: 28px; height: 28px; 
       display: flex; justify-content: center; align-items: center; 
-      border-radius: 6px; margin-right: 12px; font-weight: 900;
+      border-radius: 6px; margin-right: 10px; font-weight: 900; flex-shrink: 0;
     }
     .option-btn.correct { background: #dcfce7; border-color: #86efac; color: #166534; }
     .option-btn.correct .opt-letter { background: #22c55e; color: white; }
@@ -153,10 +155,10 @@
     
     #message-box {
       position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-      background: rgba(0,0,0,0.8); color: white; padding: 15px 25px;
-      border-radius: 12px; font-weight: bold; z-index: 100;
+      background: rgba(15, 23, 42, 0.95); color: white; padding: 16px 20px;
+      border-radius: 16px; font-weight: bold; z-index: 100;
       opacity: 0; transition: opacity 0.3s; pointer-events: none;
-      text-align: center; width: 80%;
+      text-align: center; width: 85%; font-size: 0.85rem; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
   </style>
 </head>
@@ -168,9 +170,9 @@
     <div id="start-screen" class="screen active">
       <div class="bg-decor bg-decor-1"></div><div class="bg-decor bg-decor-2"></div>
       <div class="glass-panel relative z-10">
-        <div class="text-center mb-4">
-          <div class="text-6xl mb-1">🐰</div>
-          <h1 class="text-2xl font-extrabold text-slate-800">Kelinci Edukasi</h1>
+        <div class="text-center mb-2">
+          <div class="text-5xl mb-1">🐰</div>
+          <h1 class="text-xl font-extrabold text-slate-800">Kelinci Edukasi</h1>
           <p class="text-xs text-slate-500">Bermain & Belajar</p>
         </div>
         
@@ -182,9 +184,17 @@
           <label class="block text-xs font-bold text-slate-700">Kelas (Opsional)</label>
           <input type="text" id="input-kelas" placeholder="Contoh: 5A" autocomplete="off">
         </div>
-        <div class="mb-4">
-          <label class="block text-xs font-bold text-slate-700">Kode Soal (Dari Guru)</label>
+        <div>
+          <label class="block text-xs font-bold text-slate-700">Kode Soal / ID Sheet</label>
           <input type="text" id="input-kode" placeholder="Kosongkan = Soal Default" autocomplete="off">
+        </div>
+        <div class="mb-3">
+          <label class="block text-xs font-bold text-slate-700">Kuis Muncul Setiap</label>
+          <select id="select-freq">
+            <option value="2">2 Lompatan Kelinci</option>
+            <option value="3" selected>3 Lompatan Kelinci (Rekomendasi)</option>
+            <option value="5">5 Lompatan Kelinci</option>
+          </select>
         </div>
         
         <button id="btn-start" class="btn-primary" onclick="startGame()">Mulai Bermain</button>
@@ -205,8 +215,8 @@
           <div class="text-xl font-black text-slate-800" style="-webkit-text-stroke: 1px white;">
             Skor: <span id="score-display">0</span>
           </div>
-          <div class="text-xs font-bold text-slate-600 bg-white/70 px-2 py-1 rounded-md mt-1">
-            Lompatan: <span id="jump-count-display">0</span>/3
+          <div class="text-xs font-bold text-slate-600 bg-white/80 px-2 py-1 rounded-md mt-1 backdrop-blur-sm">
+            Lompatan: <span id="jump-count-display">0</span>/<span id="target-jump-display">3</span>
           </div>
         </div>
         <div class="flex mt-2" id="lives-display">
@@ -216,7 +226,7 @@
       
       <div class="absolute bottom-6 left-0 w-full text-center pointer-events-none z-10">
         <span class="bg-slate-800/80 text-white px-4 py-2 rounded-full font-bold text-xs shadow-lg">
-          Ketuk Layar Untuk Lompat
+          Ketuk Layar Untuk Melompat
         </span>
       </div>
     </div>
@@ -224,10 +234,10 @@
     <!-- QUESTION SCREEN -->
     <div id="question-screen" class="screen" style="background: rgba(15,23,42,0.9);">
       <div class="glass-panel" style="width: 90%;">
-        <div class="flex justify-between items-center mb-3">
+        <div class="flex justify-between items-center mb-2">
           <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded-md">KUIS!</span>
         </div>
-        <h2 id="question-text" class="text-base font-bold text-slate-800 mb-4 leading-snug">
+        <h2 id="question-text" class="text-sm font-bold text-slate-800 mb-3 leading-snug">
           Pertanyaan memuat...
         </h2>
         <div id="options-container" class="flex flex-col"></div>
@@ -237,14 +247,14 @@
     <!-- GAME OVER SCREEN -->
     <div id="game-over-screen" class="screen" style="background: rgba(15, 23, 42, 0.95);">
       <div class="glass-panel text-center">
-        <div class="text-5xl mb-3" id="game-over-icon">😿</div>
-        <h2 class="text-2xl font-black text-slate-800 mb-1">Permainan Selesai</h2>
+        <div class="text-5xl mb-2" id="game-over-icon">😿</div>
+        <h2 class="text-xl font-black text-slate-800 mb-1">Permainan Selesai</h2>
         <div class="bg-blue-50 border border-blue-100 rounded-xl p-3 my-2">
           <div class="text-xs text-slate-500 font-bold">SKOR AKHIR</div>
-          <div id="final-score" class="text-4xl font-black text-blue-600">0</div>
+          <div id="final-score" class="text-3xl font-black text-blue-600">0</div>
         </div>
         
-        <div id="submit-status" class="text-xs font-bold mt-3 mb-4 text-slate-500">
+        <div id="submit-status" class="text-xs font-bold mt-2 mb-3 text-slate-500">
           Menyimpan nilai ke server...
         </div>
 
@@ -262,7 +272,6 @@
     window.addEventListener('resize', scaleContainer);
     scaleContainer(); 
 
-    // URL Web App GAS Anda
     const API_URL = "https://script.google.com/macros/s/AKfycby76NuFNTNRW1C7GzwumaBquwQ0sAu02dJJHTNcVWanswuadjzVo-Uz1PomFKaQ0pk/exec";
 
     const DOM = {
@@ -274,6 +283,7 @@
       obstacle: document.getElementById('obstacle'),
       score: document.getElementById('score-display'),
       jumpCount: document.getElementById('jump-count-display'),
+      targetJumpDisplay: document.getElementById('target-jump-display'),
       lives: document.getElementById('lives-display'),
       qText: document.getElementById('question-text'),
       options: document.getElementById('options-container'),
@@ -292,38 +302,33 @@
       obstacleSpeed: 1.5
     };
 
-    function showMsg(text, duration = 3000) {
-      DOM.msgBox.textContent = text;
+    function showMsg(text, duration = 4000) {
+      DOM.msgBox.innerHTML = text;
       DOM.msgBox.style.opacity = '1';
       setTimeout(() => DOM.msgBox.style.opacity = '0', duration);
     }
 
     async function fetchQuestions(kode) {
       const fallbackData = [
-        { id: 1, pertanyaan: "Server gagal merespon. Berapa 1 + 1?", opsi: [{letter:'A', text:'1'},{letter:'B', text:'2'},{letter:'C', text:'3'},{letter:'D', text:'4'}], jawaban: "B", poin: 10 }
+        { id: 1, pertanyaan: "Soal gagal dimuat. Berapa 1 + 1?", opsi: [{letter:'A', text:'1'},{letter:'B', text:'2'},{letter:'C', text:'3'},{letter:'D', text:'4'}], jawaban: "B", poin: 10 }
       ];
 
       try {
-        console.log("Menghubungi server GAS...");
         const fetchUrl = `${API_URL}?action=getQuestions&sheetInput=${encodeURIComponent(kode)}`;
         const response = await fetch(fetchUrl);
         const textData = await response.text(); 
-        
-        console.log("Raw Response API:", textData); // Debugging line
 
-        if (!textData || textData.trim() === "") throw new Error("Data Kosong. Pastikan server GAS berjalan.");
+        if (!textData || textData.trim() === "") throw new Error("Server mengirim data kosong.");
         
-        // Deteksi jika GAS malah mengembalikan Halaman Login Google (Tanda izin belum Anyone)
-        if(textData.includes("<!DOCTYPE html>")) {
-           showMsg("Error Izin! Server meminta login. Pastikan deploy GAS diatur ke 'Anyone'.", 5000);
-           throw new Error("Izin Web App belum terbuka untuk umum.");
+        if (textData.startsWith("<!DOCTYPE") || textData.includes("Google Drive")) {
+           showMsg("⚠️ Error: Akses Google Sheet dibatasi. Buka Sheet Soal -> Klik 'Bagikan' -> Ubah ke 'Siapa saja yang memiliki link'.", 6000);
+           throw new Error("Peringatan Izin Google Sheet.");
         }
 
         const result = JSON.parse(textData);
         
-        // Jika backend mengirim pesan error
-        if(result.error) {
-           showMsg("Error dari Sheet: " + result.error, 4000);
+        if (result.error) {
+           showMsg("⚠️ Pesan Error Sheet: " + result.error, 5000);
            throw new Error(result.error);
         }
         
@@ -341,11 +346,9 @@
                 poin: parseInt(q.poin) || 10
             }));
         }
-        throw new Error("Format Sheet salah atau kosong.");
+        throw new Error("Soal kosong atau format kolom tidak sesuai.");
       } catch (error) {
         console.error("Fetch Error:", error);
-        // Menampilkan pesan error spesifik jika gagal
-        showMsg("Gagal ambil soal. Memakai soal cadangan.", 3000);
         return fallbackData;
       }
     }
@@ -361,13 +364,13 @@
       state.nama = document.getElementById('input-nama').value.trim();
       state.kelas = document.getElementById('input-kelas').value.trim();
       state.kode = document.getElementById('input-kode').value.trim();
+      state.jumpsToNextQuestion = parseInt(document.getElementById('select-freq').value) || 3;
       
-      if (!state.nama) return showMsg("Silakan isi nama kamu!");
+      if (!state.nama) return showMsg("Silakan isi nama kamu terlebih dahulu!");
 
       DOM.btnStart.textContent = "Memuat Soal dari Server...";
       DOM.btnStart.disabled = true;
 
-      // Ambil pertanyaan sebelum game mulai
       state.questions = await fetchQuestions(state.kode);
       state.questions.sort(() => Math.random() - 0.5); 
       
@@ -384,6 +387,7 @@
       state.benar = 0; state.salah = 0; state.detail = [];
       state.startTime = Date.now();
       state.isPaused = false; state.obstacleSpeed = 1.5;
+      DOM.targetJumpDisplay.textContent = state.jumpsToNextQuestion;
       updateUI(); renderLives();
       
       DOM.obstacle.classList.add('moving');
@@ -430,7 +434,9 @@
       } else {
         if (oBox.right < pBox.left && !state.obstaclePassed) {
           state.obstaclePassed = true;
-          state.jumpsCount++; updateUI();
+          state.jumpsCount++; 
+          updateUI();
+          
           if (state.jumpsCount >= state.jumpsToNextQuestion) {
             setTimeout(triggerQuestion, 200);
           }
@@ -526,7 +532,8 @@
         if (state.lives <= 0) {
           gameOver();
         } else {
-          state.jumpsCount = 0; updateUI();
+          state.jumpsCount = 0; 
+          updateUI();
           switchScreen(DOM.game);
           resetObstacleAndResume();
         }
@@ -558,7 +565,7 @@
 
     async function submitScoreToServer() {
       DOM.submitStatus.textContent = "Menyimpan nilai ke server...";
-      DOM.submitStatus.className = "text-xs font-bold mt-3 mb-4 text-blue-600";
+      DOM.submitStatus.className = "text-xs font-bold mt-2 mb-3 text-blue-600";
 
       const durasi = Math.floor((Date.now() - state.startTime) / 1000);
       
@@ -583,14 +590,14 @@
         
         if(data.success || data.message) {
             DOM.submitStatus.textContent = "✅ Nilai berhasil disimpan di Sheet!";
-            DOM.submitStatus.className = "text-xs font-bold mt-3 mb-4 text-green-600";
+            DOM.submitStatus.className = "text-xs font-bold mt-2 mb-3 text-green-600";
         } else {
             throw new Error("Gagal disimpan");
         }
       } catch (error) {
         console.error("Gagal mengirim nilai:", error);
         DOM.submitStatus.textContent = "❌ Gagal menyimpan. Silakan screenshot nilaimu.";
-        DOM.submitStatus.className = "text-xs font-bold mt-3 mb-4 text-red-600";
+        DOM.submitStatus.className = "text-xs font-bold mt-2 mb-3 text-red-600";
       }
     }
 
