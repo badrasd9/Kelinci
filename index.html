@@ -241,6 +241,9 @@
           <div class="text-xs font-bold text-slate-600 bg-white/80 px-2 py-1 rounded-md mt-1 backdrop-blur-sm">
             Lompatan: <span id="jump-count-display">0</span>/<span id="target-jump-display">3</span>
           </div>
+          <div class="text-xs font-bold text-slate-600 bg-white/80 px-2 py-1 rounded-md mt-1 backdrop-blur-sm">
+            Soal: <span id="answered-count-display">0</span>/<span id="target-answered-display">10</span>
+          </div>
         </div>
         <div class="flex mt-2" id="lives-display">
           <div class="heart"></div><div class="heart"></div><div class="heart"></div>
@@ -271,7 +274,7 @@
     <div id="game-over-screen" class="screen" style="background: rgba(15, 23, 42, 0.95);">
       <div class="glass-panel text-center">
         <div class="text-5xl mb-2" id="game-over-icon">😿</div>
-        <h2 class="text-xl font-black text-slate-800 mb-1">Permainan Selesai</h2>
+        <h2 id="game-over-title" class="text-xl font-black text-slate-800 mb-1">Permainan Selesai</h2>
         <div class="bg-blue-50 border border-blue-100 rounded-xl p-3 my-2">
           <div class="text-xs text-slate-500 font-bold">SKOR AKHIR</div>
           <div id="final-score" class="text-3xl font-black text-blue-600">0</div>
@@ -304,6 +307,9 @@
     // ============================================================
     const API_URL = "https://script.google.com/macros/s/AKfycby76NuFNTNRW1C7GzwumaBquwQ0sAu02dJJHTNcVWanswuadjzVo-Uz1PomFKaQ0pk/exec";
 
+    // Jumlah soal yang harus terjawab dalam satu sesi permainan sebelum game berakhir.
+    const TOTAL_TARGET_QUESTIONS = 10;
+
     function scaleContainer() {
       const container = document.getElementById('app-container');
       const scale = Math.min(window.innerWidth / 360, window.innerHeight / 640);
@@ -326,10 +332,14 @@
       score: document.getElementById('score-display'),
       jumpCount: document.getElementById('jump-count-display'),
       targetJumpDisplay: document.getElementById('target-jump-display'),
+      answeredCountDisplay: document.getElementById('answered-count-display'),
+      targetAnsweredDisplay: document.getElementById('target-answered-display'),
       lives: document.getElementById('lives-display'),
       qText: document.getElementById('question-text'),
       options: document.getElementById('options-container'),
       finalScore: document.getElementById('final-score'),
+      gameOverIcon: document.getElementById('game-over-icon'),
+      gameOverTitle: document.getElementById('game-over-title'),
       btnStart: document.getElementById('btn-start'),
       msgBox: document.getElementById('message-box'),
       submitStatus: document.getElementById('submit-status')
@@ -340,7 +350,12 @@
       score: 0, lives: 3, jumpsCount: 0, jumpsToNextQuestion: 3,
       benar: 0, salah: 0, startTime: 0, detail: [],
       isJumping: false, gameLoop: null, obstaclePassed: false,
-      questions: [], currentQuestion: null, isPaused: false,
+      questions: [],       // seluruh pool soal hasil fetch (tidak diubah selama sesi)
+      questionQueue: [],   // antrian soal yang akan tampil, tidak berulang sampai pool habis
+      currentQuestion: null,
+      answeredCount: 0,    // jumlah soal yang sudah dijawab pada sesi ini
+      totalTargetQuestions: TOTAL_TARGET_QUESTIONS,
+      isPaused: false,
       obstacleSpeed: 1.5
     };
 
@@ -353,6 +368,19 @@
     function setLoading(active, text) {
       DOM.loadingOverlay.classList.toggle('active', active);
       if (text) DOM.loadingText.textContent = text;
+    }
+
+    /**
+     * Fisher-Yates shuffle - mengembalikan array baru yang teracak,
+     * tidak memodifikasi array asli.
+     */
+    function shuffleArray(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
     }
 
     /**
@@ -413,7 +441,6 @@
       setLoading(true, "Memuat soal dari server...");
       try {
         state.questions = await fetchQuestions(state.kode);
-        state.questions.sort(() => Math.random() - 0.5);
         setLoading(false);
         return true;
       } catch (error) {
@@ -460,9 +487,16 @@
     function resetGameState() {
       state.score = 0; state.lives = 3; state.jumpsCount = 0;
       state.benar = 0; state.salah = 0; state.detail = [];
+      state.answeredCount = 0;
       state.startTime = Date.now();
       state.isPaused = false; state.obstacleSpeed = 1.5;
+
+      // Antrian soal baru yang teracak untuk sesi ini, tanpa duplikat sampai pool habis.
+      state.questionQueue = shuffleArray(state.questions);
+      state.currentQuestion = null;
+
       DOM.targetJumpDisplay.textContent = state.jumpsToNextQuestion;
+      DOM.targetAnsweredDisplay.textContent = state.totalTargetQuestions;
       updateUI(); renderLives();
 
       DOM.obstacle.classList.add('moving');
@@ -527,7 +561,7 @@
       DOM.player.textContent = "😵";
 
       if (state.lives <= 0) {
-        setTimeout(gameOver, 800);
+        setTimeout(() => gameOver('lose'), 800);
       } else {
         DOM.game.style.backgroundColor = "rgba(239, 68, 68, 0.4)";
         setTimeout(() => {
@@ -547,13 +581,34 @@
       state.isPaused = false;
     }
 
+    /**
+     * Mengambil soal berikutnya dari antrian tanpa mengulang soal yang sama
+     * selama masih ada soal lain yang belum tampil pada sesi ini.
+     * Jika antrian habis (semua soal di pool sudah tampil), antrian diisi ulang
+     * dengan urutan acak baru, dan soal terakhir yang baru tampil dijamin
+     * tidak langsung tampil lagi di posisi pertama antrian baru.
+     */
+    function getNextQuestion() {
+      if (state.questionQueue.length === 0) {
+        state.questionQueue = shuffleArray(state.questions);
+
+        if (state.currentQuestion && state.questionQueue.length > 1 &&
+            state.questionQueue[0].id === state.currentQuestion.id) {
+          [state.questionQueue[0], state.questionQueue[1]] =
+            [state.questionQueue[1], state.questionQueue[0]];
+        }
+      }
+      return state.questionQueue.shift();
+    }
+
     function triggerQuestion() {
       state.isPaused = true;
       DOM.obstacle.classList.remove('moving');
 
-      if (state.questions.length === 0) return gameOver();
-      state.currentQuestion = state.questions.shift();
-      state.questions.push(state.currentQuestion);
+      if (state.questions.length === 0) return gameOver('lose');
+
+      state.currentQuestion = getNextQuestion();
+      if (!state.currentQuestion) return gameOver('lose');
 
       switchScreen(DOM.question);
 
@@ -582,6 +637,9 @@
         benar: isCorrect
       });
 
+      state.answeredCount++;
+      updateUI();
+
       if (isCorrect) {
         btn.classList.add('correct');
         state.score += state.currentQuestion.poin;
@@ -605,7 +663,9 @@
 
       setTimeout(() => {
         if (state.lives <= 0) {
-          gameOver();
+          gameOver('lose');
+        } else if (state.answeredCount >= state.totalTargetQuestions) {
+          gameOver('finish');
         } else {
           state.jumpsCount = 0;
           updateUI();
@@ -618,6 +678,7 @@
     function updateUI() {
       DOM.score.textContent = state.score;
       DOM.jumpCount.textContent = state.jumpsCount;
+      DOM.answeredCountDisplay.textContent = state.answeredCount;
     }
 
     function renderLives() {
@@ -628,13 +689,26 @@
       }
     }
 
-    function gameOver() {
+    /**
+     * Mengakhiri permainan.
+     * @param {'lose'|'finish'} reason - 'lose' jika nyawa habis, 'finish' jika
+     *        target jumlah soal (TOTAL_TARGET_QUESTIONS) sudah tercapai.
+     */
+    function gameOver(reason) {
       clearInterval(state.gameLoop);
       state.isPaused = true;
       DOM.obstacle.classList.remove('moving');
       DOM.finalScore.textContent = state.score;
-      switchScreen(DOM.gameOver);
 
+      if (reason === 'finish') {
+        DOM.gameOverIcon.textContent = '🎉';
+        DOM.gameOverTitle.textContent = `Selesai! ${state.totalTargetQuestions} Soal Terjawab`;
+      } else {
+        DOM.gameOverIcon.textContent = '😿';
+        DOM.gameOverTitle.textContent = 'Permainan Selesai';
+      }
+
+      switchScreen(DOM.gameOver);
       submitScoreToServer();
     }
 
