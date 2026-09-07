@@ -2,322 +2,295 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Kelinci Melompat Edukasi</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     :root {
-      --bg-color: #7DD3FC; /* Sky blue */
-      --ground-color: #22C55E; /* Grass green */
+      --bg-color: #7DD3FC;
+      --ground-color: #22C55E;
       --ground-accent: #16A34A;
       --text-color: #0F172A;
       --panel-bg: rgba(255, 255, 255, 0.95);
+      --logical-width: 360px;
+      --logical-height: 640px;
     }
     
     * { 
       box-sizing: border-box; 
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      -webkit-tap-highlight-color: transparent;
     }
     
-    html {
-      background-color: #0f172a; 
+    body, html {
+      margin: 0; padding: 0;
+      width: 100vw; height: 100dvh;
+      background-color: #0f172a; /* Warna latar luar game */
       display: flex;
       justify-content: center;
       align-items: center;
-      width: 100%;
-      height: 100dvh; 
-      margin: 0;
-      padding: 0;
-      overscroll-behavior: none; 
+      overflow: hidden;
+      touch-action: none; /* Mencegah layar tertarik / pull to refresh */
     }
 
-    body {
-      margin: 0; 
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      max-width: 480px; 
+    #app-container {
+      width: var(--logical-width);
+      height: var(--logical-height);
       background-color: var(--bg-color);
-      color: var(--text-color);
-      overflow: hidden; 
       position: relative;
-      touch-action: none; 
-      user-select: none; 
-      -webkit-user-select: none;
-      -webkit-touch-callout: none; 
-      -webkit-tap-highlight-color: transparent; 
+      overflow: hidden;
+      transform-origin: center center;
+      /* Box shadow untuk mempercantik tampilan jika di PC */
+      box-shadow: 0 0 40px rgba(0,0,0,0.5);
+      border-radius: 0px; 
     }
-    
-    @media (min-width: 481px) {
-      body {
-        height: 92%; 
-        max-height: 850px;
-        border-radius: 28px; 
-        border: 8px solid #334155; 
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8); 
+
+    @media (min-width: 480px) {
+      #app-container {
+        border-radius: 20px;
+        border: 8px solid #334155;
       }
     }
 
     .screen {
       display: none; 
-      width: 100%; 
-      height: 100%; 
-      flex-direction: column; 
-      align-items: center; 
-      justify-content: center;
-      position: absolute;
-      top: 0;
-      left: 0;
-      z-index: 10;
+      width: 100%; height: 100%; 
+      flex-direction: column; align-items: center; justify-content: center;
+      position: absolute; top: 0; left: 0; z-index: 10;
     }
     
-    .screen.active { 
-      display: flex; 
-    }
+    .screen.active { display: flex; }
 
     .glass-panel {
       background: var(--panel-bg);
-      padding: 2rem;
+      padding: 1.5rem;
       border-radius: 24px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
       width: 90%;
-      max-width: 380px;
       backdrop-filter: blur(10px);
     }
 
     input {
-      width: 100%;
-      padding: 12px 16px;
-      margin-top: 6px;
-      margin-bottom: 16px;
-      border: 2px solid #e2e8f0;
-      border-radius: 12px;
-      font-size: 1rem;
-      outline: none;
-      transition: border-color 0.2s;
+      width: 100%; padding: 10px 14px;
+      margin-top: 4px; margin-bottom: 12px;
+      border: 2px solid #e2e8f0; border-radius: 12px;
+      font-size: 1rem; outline: none; transition: border-color 0.2s;
+      user-select: text; -webkit-user-select: text;
     }
     input:focus { border-color: #3b82f6; }
 
     button.btn-primary {
-      width: 100%;
-      background: linear-gradient(135deg, #3b82f6, #2563eb);
-      color: white;
-      border: none;
-      padding: 14px;
-      border-radius: 12px;
-      font-size: 1.1rem;
-      font-weight: bold;
-      cursor: pointer;
-      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
-      transition: transform 0.1s, box-shadow 0.1s;
+      width: 100%; background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: white; border: none; padding: 14px;
+      border-radius: 12px; font-size: 1.1rem; font-weight: bold;
+      cursor: pointer; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+      transition: transform 0.1s;
     }
-    button.btn-primary:active {
-      transform: scale(0.98);
-      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
-    }
+    button.btn-primary:active { transform: scale(0.96); }
+    button.btn-primary:disabled { filter: grayscale(1); opacity: 0.7; pointer-events: none; }
 
-    .heart {
-      width: 24px; height: 24px;
-      background: #ef4444;
-      position: relative;
-      transform: rotate(-45deg);
-      margin: 0 5px;
-      transition: all 0.3s;
-    }
-    .heart::before, .heart::after {
-      content: "";
-      width: 24px; height: 24px;
-      background: #ef4444;
-      border-radius: 50%;
-      position: absolute;
-    }
-    .heart::before { top: -12px; left: 0; }
-    .heart::after { top: 0; left: 12px; }
-    .heart.empty { filter: grayscale(1); opacity: 0.3; }
-
-    #game-container {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      overflow: hidden; cursor: pointer; z-index: 1;
-    }
-
-    .bg-decor { position: absolute; border-radius: 50%; filter: blur(40px); z-index: 0; }
-    .bg-decor-1 { top: -100px; left: -50px; width: 400px; height: 400px; background: rgba(255,255,255,0.4); }
-    .bg-decor-2 { top: 50px; right: -100px; width: 300px; height: 300px; background: rgba(254,240,138,0.5); }
+    .bg-decor { position: absolute; border-radius: 50%; filter: blur(30px); z-index: 0; }
+    .bg-decor-1 { top: -50px; left: -50px; width: 250px; height: 250px; background: rgba(255,255,255,0.4); }
+    .bg-decor-2 { top: 50px; right: -50px; width: 200px; height: 200px; background: rgba(254,240,138,0.5); }
     
     #ground {
       position: absolute; bottom: 0; left: 0; width: 100%; height: 20%;
-      background: var(--ground-color);
+      background: var(--ground-color); z-index: 2;
     }
     #ground::before {
-      content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 20px;
+      content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 12px;
       background: var(--ground-accent); opacity: 0.3;
     }
     
+    /* Ukuran menggunakan Fixed Pixel agar sama persis di semua perangkat */
     #player {
-      position: absolute; bottom: 20%; left: 15%;
-      font-size: 4.5rem; line-height: 1; z-index: 5;
-      transition: bottom 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-      /* Hilangkan margin/padding yang mengganggu bounding box */
-      margin: 0; padding: 0; display: block;
+      position: absolute; bottom: 20%; left: 40px;
+      width: 60px; height: 60px;
+      font-size: 3.5rem; line-height: 60px; text-align: center;
+      z-index: 5;
+      transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
     }
-    #player.jumping { bottom: calc(20% + 150px); }
+    #player.jumping { transform: translateY(-130px); }
     
     #obstacle {
-      position: absolute; bottom: 20%; right: -80px; z-index: 4;
+      position: absolute; bottom: 20%; left: 100%; 
+      z-index: 4;
     }
     
     .obstacle-body {
-      width: 40px; height: 60px;
+      width: 36px; height: 50px;
       background: #854d0e;
-      border-radius: 20px 20px 0 0;
+      border-radius: 18px 18px 0 0;
       position: relative;
     }
     .obstacle-body::after {
-      content: ''; position: absolute; top: -15px; left: 24px; width: 12px; height: 30px;
-      background: #FCD34D; border-radius: 20px; border: 4px solid white; transform: rotate(10deg);
+      content: ''; position: absolute; top: -10px; left: 20px; width: 10px; height: 24px;
+      background: #FCD34D; border-radius: 10px; border: 3px solid white; transform: rotate(10deg);
     }
 
+    /* Animasi absolut (Kiri ke Kanan dari layar 360px). Durasi TETAP */
     @keyframes moveLeft {
-      0% { right: -80px; }
-      100% { right: 100%; }
+      0% { transform: translateX(50px); }
+      100% { transform: translateX(-450px); }
     }
-    .moving {
-      animation: moveLeft 1.5s linear infinite;
+    .moving { animation: moveLeft 1.5s linear infinite; }
+
+    .heart {
+      width: 18px; height: 18px; background: #ef4444;
+      position: relative; transform: rotate(-45deg); margin: 0 4px;
     }
+    .heart::before, .heart::after {
+      content: ""; width: 18px; height: 18px; background: #ef4444;
+      border-radius: 50%; position: absolute;
+    }
+    .heart::before { top: -9px; left: 0; }
+    .heart::after { top: 0; left: 9px; }
+    .heart.empty { filter: grayscale(1); opacity: 0.3; }
 
     #ui-layer {
-      position: absolute; top: 0; left: 0; width: 100%; padding: 20px;
+      position: absolute; top: 0; left: 0; width: 100%; padding: 16px;
       display: flex; justify-content: space-between; align-items: flex-start;
       z-index: 8; pointer-events: none;
     }
 
     .option-btn {
-      width: 100%; padding: 12px; margin-bottom: 10px;
+      width: 100%; padding: 12px; margin-bottom: 8px;
       background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 12px;
-      font-size: 1rem; text-align: left; cursor: pointer;
+      font-size: 0.95rem; font-weight: 600; text-align: left; cursor: pointer;
       transition: all 0.2s;
     }
-    .option-btn:hover { background: #e0f2fe; border-color: #bae6fd; }
     .option-btn.correct { background: #dcfce7; border-color: #86efac; color: #166534; }
     .option-btn.wrong { background: #fee2e2; border-color: #fca5a5; color: #991b1b; }
+    
+    #message-box {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      background: rgba(0,0,0,0.8); color: white; padding: 15px 25px;
+      border-radius: 12px; font-weight: bold; z-index: 100;
+      opacity: 0; transition: opacity 0.3s; pointer-events: none;
+      text-align: center; width: 80%;
+    }
   </style>
 </head>
 <body>
 
-  <div id="start-screen" class="screen active" style="background: var(--bg-color);">
-    <div class="bg-decor bg-decor-1"></div>
-    <div class="bg-decor bg-decor-2"></div>
+  <div id="app-container">
     
-    <div class="glass-panel relative z-10">
-      <div class="text-center mb-6">
-        <div class="text-6xl mb-2">🐰</div>
-        <h1 class="text-2xl font-extrabold text-slate-800">Kelinci Melompat</h1>
-        <p class="text-sm text-slate-500">Petualangan sambil belajar!</p>
-      </div>
-      
-      <div class="mb-4">
-        <label class="block text-sm font-bold text-slate-700">Nama Lengkap</label>
-        <input type="text" id="input-nama" placeholder="Masukkan nama..." autocomplete="off">
-      </div>
-      
-      <div class="mb-4">
-        <label class="block text-sm font-bold text-slate-700">Kelas (Opsional)</label>
-        <input type="text" id="input-kelas" placeholder="Contoh: 5A" autocomplete="off">
-      </div>
-      
-      <div class="mb-6">
-        <label class="block text-sm font-bold text-slate-700">Kode Soal (Dari Guru)</label>
-        <input type="text" id="input-kode" placeholder="Masukkan nama tab soal..." autocomplete="off">
-      </div>
-      
-      <button class="btn-primary" onclick="startGame()">Mulai Bermain</button>
-      <div id="loading-start" class="hidden text-center mt-4 font-bold text-orange-500 text-sm">
-        Memuat soal dari server...
+    <!-- MESEAGE BOX CUSTOM -->
+    <div id="message-box">Pesan</div>
+
+    <!-- START SCREEN -->
+    <div id="start-screen" class="screen active">
+      <div class="bg-decor bg-decor-1"></div><div class="bg-decor bg-decor-2"></div>
+      <div class="glass-panel relative z-10">
+        <div class="text-center mb-4">
+          <div class="text-6xl mb-1">🐰</div>
+          <h1 class="text-2xl font-extrabold text-slate-800">Kelinci Edukasi</h1>
+          <p class="text-xs text-slate-500">Bermain & Belajar</p>
+        </div>
+        
+        <div>
+          <label class="block text-xs font-bold text-slate-700">Nama Lengkap</label>
+          <input type="text" id="input-nama" placeholder="Masukkan nama..." autocomplete="off">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700">Kelas (Opsional)</label>
+          <input type="text" id="input-kelas" placeholder="Contoh: 5A" autocomplete="off">
+        </div>
+        <div class="mb-4">
+          <label class="block text-xs font-bold text-slate-700">Kode Tab Soal (Dari Guru)</label>
+          <input type="text" id="input-kode" placeholder="Ketik kode sheet..." autocomplete="off">
+        </div>
+        
+        <button id="btn-start" class="btn-primary" onclick="startGame()">Mulai Bermain</button>
       </div>
     </div>
-  </div>
 
-  <div id="game-screen" class="screen" style="background: transparent;">
-    <div id="game-container" onclick="jump()">
-      <div class="bg-decor bg-decor-1"></div>
-      <div class="bg-decor bg-decor-2"></div>
+    <!-- GAME SCREEN -->
+    <div id="game-screen" class="screen">
+      <div id="game-area-clickable" style="position:absolute; width:100%; height:100%; z-index:9;" onclick="jump()"></div>
+      <div class="bg-decor bg-decor-1"></div><div class="bg-decor bg-decor-2"></div>
+      
       <div id="ground"></div>
       <div id="player">🐰</div>
       <div id="obstacle"><div class="obstacle-body"></div></div>
-    </div>
-    
-    <div id="ui-layer">
-      <div class="flex flex-col">
-        <div class="text-xl font-black text-slate-800 drop-shadow-md" style="-webkit-text-stroke: 1px white;">
-          Skor: <span id="score-display">0</span>
+      
+      <div id="ui-layer">
+        <div class="flex flex-col">
+          <div class="text-xl font-black text-slate-800" style="-webkit-text-stroke: 1px white;">
+            Skor: <span id="score-display">0</span>
+          </div>
+          <div class="text-xs font-bold text-slate-600 bg-white/70 px-2 py-1 rounded-md mt-1">
+            Lompatan: <span id="jump-count-display">0</span>/3
+          </div>
         </div>
-        <div class="text-sm font-bold text-slate-600 bg-white/70 px-2 py-1 rounded-md mt-1">
-          Lompatan: <span id="jump-count-display">0</span>/3
+        <div class="flex mt-2" id="lives-display">
+          <div class="heart"></div><div class="heart"></div><div class="heart"></div>
         </div>
       </div>
-      <div class="flex" id="lives-display">
-        <div class="heart"></div>
-        <div class="heart"></div>
-        <div class="heart"></div>
-      </div>
-    </div>
-    
-    <div id="instruction-bar" class="absolute bottom-6 left-0 w-full text-center pointer-events-none z-10">
-      <span class="bg-slate-800/70 text-white px-4 py-2 rounded-full font-bold text-sm tracking-wide shadow-lg backdrop-blur-sm">
-        Ketuk Layar Untuk Melompat
-      </span>
-    </div>
-  </div>
-
-  <div id="question-screen" class="screen" style="background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(5px);">
-    <div class="glass-panel" style="width: 95%; max-width: 400px; padding: 1.5rem;">
-      <div class="flex justify-between items-center mb-4">
-        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-          Waktunya Kuis!
-        </span>
-        <span class="font-bold text-orange-500 flex items-center gap-1">
-          ⏱️ <span id="timer-display">15</span>s
+      
+      <div class="absolute bottom-6 left-0 w-full text-center pointer-events-none z-10">
+        <span class="bg-slate-800/80 text-white px-4 py-2 rounded-full font-bold text-xs shadow-lg">
+          Ketuk Layar Untuk Lompat
         </span>
       </div>
-      
-      <h2 id="question-text" class="text-lg font-bold text-slate-800 mb-6 leading-tight">
-        Memuat pertanyaan...
-      </h2>
-      
-      <div id="options-container" class="flex flex-col gap-2">
-        <!-- Tombol opsi akan dibuat oleh JavaScript -->
-      </div>
     </div>
-  </div>
 
-  <div id="game-over-screen" class="screen" style="background: rgba(15, 23, 42, 0.9);">
-    <div class="glass-panel text-center">
-      <div class="text-6xl mb-4">😿</div>
-      <h2 class="text-3xl font-black text-slate-800 mb-2">Permainan Selesai!</h2>
-      <p class="text-slate-600 mb-6">Hebat! Kamu sudah berusaha dengan baik.</p>
-      
-      <div class="bg-blue-50 border-2 border-blue-100 rounded-xl p-4 mb-6">
-        <div class="text-sm text-slate-500 font-bold uppercase tracking-wider">Skor Akhir</div>
-        <div id="final-score" class="text-5xl font-black text-blue-600">0</div>
+    <!-- QUESTION SCREEN -->
+    <div id="question-screen" class="screen" style="background: rgba(15,23,42,0.9);">
+      <div class="glass-panel" style="width: 90%;">
+        <div class="flex justify-between items-center mb-3">
+          <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded-md">KUIS!</span>
+        </div>
+        <h2 id="question-text" class="text-base font-bold text-slate-800 mb-4 leading-snug">
+          Pertanyaan memuat...
+        </h2>
+        <div id="options-container" class="flex flex-col"></div>
       </div>
-      
-      <button class="btn-primary" onclick="resetGame()">Main Lagi</button>
     </div>
+
+    <!-- GAME OVER SCREEN -->
+    <div id="game-over-screen" class="screen" style="background: rgba(15, 23, 42, 0.95);">
+      <div class="glass-panel text-center">
+        <div class="text-5xl mb-3" id="game-over-icon">😿</div>
+        <h2 class="text-2xl font-black text-slate-800 mb-1">Permainan Selesai</h2>
+        <div class="bg-blue-50 border border-blue-100 rounded-xl p-3 my-4">
+          <div class="text-xs text-slate-500 font-bold">SKOR AKHIR</div>
+          <div id="final-score" class="text-4xl font-black text-blue-600">0</div>
+        </div>
+        <button class="btn-primary" onclick="resetGame()">Main Lagi</button>
+      </div>
+    </div>
+
   </div>
 
   <script>
-    // GANTI DENGAN URL WEB APP GOOGLE APPS SCRIPT-MU SENDIRI
-    const API_URL = "https://script.google.com/macros/s/AKfycbz_K_N3_Xn9-n8_Xn9_Xn9_Xn9_Xn9_Xn9/exec"; 
+    function scaleContainer() {
+      const container = document.getElementById('app-container');
+      const winW = window.innerWidth;
+      const winH = window.innerHeight;
+      
+      // Hitung skala terbaik agar pas di layar tanpa merubah rasio game (360x640)
+      const scaleX = winW / 360;
+      const scaleY = winH / 640;
+      const scale = Math.min(scaleX, scaleY);
+      
+      container.style.transform = `scale(${scale})`;
+    }
+    
+    window.addEventListener('resize', scaleContainer);
+    scaleContainer(); // Jalankan saat awal render
 
-    // DOM Elements
-    const screens = {
+    // URL Web App GAS Anda
+    const API_URL = "https://script.google.com/macros/s/AKfycby76NuFNTNRW1C7GzwumaBquwQ0sAu02dJJHTNcVWanswuadjzVo-Uz1PomFKaQ0pk/exec";
+
+    const DOM = {
       start: document.getElementById('start-screen'),
       game: document.getElementById('game-screen'),
       question: document.getElementById('question-screen'),
-      gameOver: document.getElementById('game-over-screen')
-    };
-    
-    const DOM = {
+      gameOver: document.getElementById('game-over-screen'),
       player: document.getElementById('player'),
       obstacle: document.getElementById('obstacle'),
       score: document.getElementById('score-display'),
@@ -325,177 +298,163 @@
       lives: document.getElementById('lives-display'),
       qText: document.getElementById('question-text'),
       options: document.getElementById('options-container'),
-      timer: document.getElementById('timer-display'),
       finalScore: document.getElementById('final-score'),
-      loading: document.getElementById('loading-start')
+      btnStart: document.getElementById('btn-start'),
+      msgBox: document.getElementById('message-box')
     };
 
-    // Game State
     let state = {
-      score: 0,
-      lives: 3,
-      jumpsCount: 0,
-      jumpsToNextQuestion: 3,
-      isJumping: false,
-      gameLoop: null,
-      obstaclePassed: false,
-      questions: [],
-      currentQuestion: null,
-      timerInterval: null,
-      timeLeft: 15,
-      isPaused: false
+      score: 0, lives: 3, jumpsCount: 0, jumpsToNextQuestion: 3,
+      isJumping: false, gameLoop: null, obstaclePassed: false,
+      questions: [], currentQuestion: null, isPaused: false,
+      obstacleSpeed: 1.5
     };
+
+    function showMsg(text) {
+      DOM.msgBox.textContent = text;
+      DOM.msgBox.style.opacity = '1';
+      setTimeout(() => DOM.msgBox.style.opacity = '0', 2000);
+    }
 
     async function fetchQuestions(kode) {
-      // Untuk pratinjau ini, kita sediakan soal bawaan (fallback) jika API gagal/belum disetel
-      const fallbackQuestions = [
-        { pertanyaan: "Berapa 5 + 7?", opsi: ["10", "11", "12", "13"], jawaban: "12", poin: 10 },
-        { pertanyaan: "Apa ibu kota Indonesia?", opsi: ["Bandung", "Jakarta", "Surabaya", "Bali"], jawaban: "Jakarta", poin: 10 },
-        { pertanyaan: "Hewan apa yang mengeong?", opsi: ["Anjing", "Kucing", "Sapi", "Ayam"], jawaban: "Kucing", poin: 10 },
-        { pertanyaan: "Berapa 10 - 4?", opsi: ["5", "6", "7", "8"], jawaban: "6", poin: 10 },
-        { pertanyaan: "Warna daun yang sehat biasanya?", opsi: ["Merah", "Kuning", "Hijau", "Biru"], jawaban: "Hijau", poin: 10 }
+      // Fallback Data untuk mencegah Game Over jika Fetching gagal/timeout
+      const fallbackData = [
+        { pertanyaan: "1 + 1 = ?", opsi: ["1", "2", "3", "4"], jawaban: "2", poin: 10 },
+        { pertanyaan: "Warna langit di siang hari?", opsi: ["Merah", "Biru", "Kuning", "Hijau"], jawaban: "Biru", poin: 10 },
+        { pertanyaan: "Hewan apa yang mengeong?", opsi: ["Anjing", "Kucing", "Sapi", "Ayam"], jawaban: "Kucing", poin: 10 }
       ];
 
       try {
-        // Jika URL belum diganti, langsung gunakan soal lokal
-        if(API_URL.includes("AKfycbz_K_N3")) {
-          console.log("Menggunakan soal demo lokal...");
-          return fallbackQuestions;
+        const fetchUrl = `${API_URL}?action=getQuestions&sheetId=${encodeURIComponent(kode)}&kode=${encodeURIComponent(kode)}`;
+        const response = await fetch(fetchUrl);
+        
+        // Membaca text mentah dulu agar terhindar dari SyntaxError "Unexpected end of input"
+        const textData = await response.text(); 
+        if (!textData || textData.trim() === "") {
+          console.warn("Respons JSON kosong, memakai fallback lokal.");
+          return fallbackData;
         }
 
-        const response = await fetch(`${API_URL}?kode=${encodeURIComponent(kode)}`);
-        const result = await response.json();
+        const result = JSON.parse(textData);
         
-        if (result.status === 'success' && result.data.length > 0) {
-          // Format data dari API ke format internal game
-          return result.data.map(q => ({
-            pertanyaan: q[1], // Asumsi kolom B
-            opsi: [q[2], q[3], q[4], q[5]].filter(Boolean), // C, D, E, F
-            jawaban: q[6], // G
-            poin: q[7] || 10 // H
-          }));
+        // Format mapping disesuaikan dengan struktur GAS array baru 
+        if (result && Array.isArray(result) && result.length > 0) {
+            return result.map(q => ({
+                pertanyaan: q.pertanyaan || q[1],
+                opsi: [q.a || q[2], q.b || q[3], q.c || q[4], q.d || q[5]].filter(Boolean),
+                jawaban: q.jawaban || q[6],
+                poin: q.poin || q[7] || 10
+            }));
+        } else if (result.status === 'success' && result.data) {
+            return result.data.map(q => ({
+                pertanyaan: q[1],
+                opsi: [q[2], q[3], q[4], q[5]].filter(Boolean),
+                jawaban: q[6],
+                poin: q[7] || 10
+            }));
         }
-        throw new Error(result.message || "Data kosong");
+        
+        throw new Error("Data tidak lengkap");
       } catch (error) {
-        console.warn("Gagal mengambil soal dari Google Sheets, menggunakan soal cadangan.", error);
-        return fallbackQuestions;
+        console.error("API Fetch Error:", error);
+        return fallbackData;
       }
     }
 
-    function showScreen(screenName) {
-      Object.values(screens).forEach(s => s.classList.remove('active'));
-      screens[screenName].classList.add('active');
+    function switchScreen(screen) {
+      Object.values(DOM).forEach(el => {
+        if(el.classList && el.classList.contains('screen')) el.classList.remove('active');
+      });
+      screen.classList.add('active');
     }
 
     async function startGame() {
       const nama = document.getElementById('input-nama').value.trim();
       const kode = document.getElementById('input-kode').value.trim();
       
-      if (!nama) {
-        alert("Silakan isi nama kamu terlebih dahulu!");
-        return;
-      }
+      if (!nama) return showMsg("Silakan isi nama kamu!");
 
-      DOM.loading.classList.remove('hidden');
-      document.querySelector('.btn-primary').disabled = true;
+      DOM.btnStart.textContent = "Memuat Soal...";
+      DOM.btnStart.disabled = true;
 
-      // Ambil soal
       state.questions = await fetchQuestions(kode);
-      // Acak urutan soal
-      state.questions = state.questions.sort(() => Math.random() - 0.5);
+      state.questions.sort(() => Math.random() - 0.5); // Acak soal
       
-      DOM.loading.classList.add('hidden');
-      document.querySelector('.btn-primary').disabled = false;
+      DOM.btnStart.textContent = "Mulai Bermain";
+      DOM.btnStart.disabled = false;
 
       resetGameState();
-      showScreen('game');
+      switchScreen(DOM.game);
       startGameLoop();
     }
 
     function resetGameState() {
-      state.score = 0;
-      state.lives = 3;
-      state.jumpsCount = 0;
-      state.isPaused = false;
-      updateUI();
-      renderLives();
+      state.score = 0; state.lives = 3; state.jumpsCount = 0;
+      state.isPaused = false; state.obstacleSpeed = 1.5;
+      updateUI(); renderLives();
       
       DOM.obstacle.classList.add('moving');
-      DOM.obstacle.style.animationDuration = '1.5s'; // Kecepatan awal rintangan
+      DOM.obstacle.style.animationDuration = state.obstacleSpeed + 's';
     }
 
     function jump() {
       if (state.isJumping || state.isPaused) return;
-      
       state.isJumping = true;
       DOM.player.classList.add('jumping');
       
-      // Tunggu animasi CSS selesai sebelum kelinci bisa melompat lagi
+      // Tunggu animasi naik+turun sesuai CSS Transform (.35s)
       setTimeout(() => {
         DOM.player.classList.remove('jumping');
-        setTimeout(() => {
-          state.isJumping = false;
-        }, 300); // Waktu turun
-      }, 300); // Waktu naik (sesuaikan dengan CSS transition player)
+        setTimeout(() => { state.isJumping = false; }, 350); 
+      }, 350);
     }
 
-    // Dukungan melompat pakai tombol Spasi di PC
     document.addEventListener('keydown', (e) => {
-      if ((e.code === 'Space' || e.code === 'ArrowUp') && screens.game.classList.contains('active')) {
-        jump();
+      if ((e.code === 'Space' || e.code === 'ArrowUp') && DOM.game.classList.contains('active')) {
+        jump(); e.preventDefault();
       }
     });
 
     function startGameLoop() {
       if (state.gameLoop) clearInterval(state.gameLoop);
-      
-      state.gameLoop = setInterval(() => {
-        if (state.isPaused) return;
-        
-        checkCollision();
-      }, 50); // Cek benturan setiap 50ms
+      state.gameLoop = setInterval(checkCollision, 30);
     }
 
     function checkCollision() {
-      // Ambil posisi elemen secara real-time
-      const playerRect = DOM.player.getBoundingClientRect();
-      const obstacleRect = DOM.obstacle.getBoundingClientRect();
+      if (state.isPaused) return;
+
+      const pBox = DOM.player.getBoundingClientRect();
+      const oBox = DOM.obstacle.getBoundingClientRect();
       
-      // Hitung toleransi hitbox agar game tidak terlalu sulit (lebih fair)
-      const hitToleransi = 15;
+      // Toleransi Hitbox agar adil
+      const hitToleransi = 10;
       
-      // Cek apakah kotak kelinci dan kotak rintangan saling tumpang tindih
       const isColliding = !(
-        playerRect.right - hitToleransi < obstacleRect.left || 
-        playerRect.left + hitToleransi > obstacleRect.right || 
-        playerRect.bottom - hitToleransi < obstacleRect.top || 
-        playerRect.top + hitToleransi > obstacleRect.bottom
+        pBox.right - hitToleransi < oBox.left || 
+        pBox.left + hitToleransi > oBox.right || 
+        pBox.bottom - hitToleransi < oBox.top || 
+        pBox.top + hitToleransi > oBox.bottom
       );
 
       if (isColliding) {
         handleHit();
       } else {
-        // Logika untuk mendeteksi apakah rintangan sukses dilewati
-        // Membandingkan posisi kanan rintangan dengan posisi kiri kelinci
-        if (obstacleRect.right < playerRect.left && !state.obstaclePassed) {
-          state.obstaclePassed = true; // Tandai sudah dilewati agar tidak dihitung ganda
+        // Karena resolusi di-scale (CSS transform), getBoundingClientRect merespon presisi
+        // Jika rintangan telah melewati Player sepenuhnya
+        if (oBox.right < pBox.left && !state.obstaclePassed) {
+          state.obstaclePassed = true;
           state.jumpsCount++;
           updateUI();
           
-          // Jika jumlah lompatan mencapai target, hentikan game dan munculkan pertanyaan
           if (state.jumpsCount >= state.jumpsToNextQuestion) {
-            setTimeout(() => {
-              triggerQuestion();
-            }, 300); // Beri sedikit jeda agar animasi lompat selesai
+            setTimeout(triggerQuestion, 200);
           }
         }
         
-        // Reset status saat rintangan sudah keluar layar di sebelah kiri
-        // Gunakan clientWidth dari body agar hitungan dinamis sesuai layar
-        if (obstacleRect.left > document.body.clientWidth || obstacleRect.left < 0) {
-           if(obstacleRect.right < 0) {
-               state.obstaclePassed = false;
-           }
+        // Reset state jika rintangan hilang dari layar bagian kiri
+        // Karena menggunakan Fixed Resolution, 0 adalah batas presisi paling kiri
+        if (oBox.right < 0) {
+           state.obstaclePassed = false;
         }
       }
     }
@@ -505,25 +464,24 @@
       DOM.obstacle.classList.remove('moving');
       state.lives--;
       renderLives();
-      
       DOM.player.textContent = "😵";
       
       if (state.lives <= 0) {
-        setTimeout(gameOver, 1000);
+        setTimeout(gameOver, 800);
       } else {
-        // Efek kedip merah di layar jika tertabrak
-        screens.game.style.backgroundColor = "rgba(239, 68, 68, 0.4)";
+        DOM.game.style.backgroundColor = "rgba(239, 68, 68, 0.4)";
         setTimeout(() => {
-          screens.game.style.backgroundColor = "transparent";
+          DOM.game.style.backgroundColor = "transparent";
           DOM.player.textContent = "🐰";
           resetObstacleAndResume();
-        }, 1500);
+        }, 1200);
       }
     }
 
     function resetObstacleAndResume() {
+      // Hapus & Terapkan animasi ulang agar mengulang dari awal
       DOM.obstacle.style.animation = 'none';
-      DOM.obstacle.offsetHeight; // Trigger reflow
+      void DOM.obstacle.offsetWidth; // Trigger Reflow
       DOM.obstacle.style.animation = null;
       DOM.obstacle.classList.add('moving');
       state.obstaclePassed = false;
@@ -534,47 +492,24 @@
       state.isPaused = true;
       DOM.obstacle.classList.remove('moving');
       
-      // Ambil soal dari urutan, jika habis putar dari awal
       if(state.questions.length === 0) return gameOver(); 
       state.currentQuestion = state.questions.shift();
-      state.questions.push(state.currentQuestion); // Masukkan lagi ke belakang
+      state.questions.push(state.currentQuestion); 
       
-      showQuestionScreen();
-    }
-
-    function showQuestionScreen() {
-      showScreen('question');
+      switchScreen(DOM.question);
       
       DOM.qText.textContent = state.currentQuestion.pertanyaan;
       DOM.options.innerHTML = '';
       
-      // Render Pilihan Ganda
       state.currentQuestion.opsi.forEach(opt => {
         const btn = document.createElement('button');
-        btn.className = 'option-btn';
-        btn.textContent = opt;
+        btn.className = 'option-btn'; btn.textContent = opt;
         btn.onclick = () => checkAnswer(btn, opt);
         DOM.options.appendChild(btn);
       });
-
-      // Mulai Hitung Mundur
-      state.timeLeft = 15;
-      DOM.timer.textContent = state.timeLeft;
-      clearInterval(state.timerInterval);
-      state.timerInterval = setInterval(() => {
-        state.timeLeft--;
-        DOM.timer.textContent = state.timeLeft;
-        if (state.timeLeft <= 0) {
-          clearInterval(state.timerInterval);
-          handleTimeOut();
-        }
-      }, 1000);
     }
 
     function checkAnswer(btn, selected) {
-      clearInterval(state.timerInterval);
-      
-      // Kunci semua tombol agar tidak bisa diklik dua kali
       const allBtns = document.querySelectorAll('.option-btn');
       allBtns.forEach(b => b.disabled = true);
       
@@ -583,62 +518,32 @@
       if (isCorrect) {
         btn.classList.add('correct');
         state.score += parseInt(state.currentQuestion.poin) || 10;
-        
-        // Persulit game perlahan: Rintangan makin cepat
-        const currentSpeed = parseFloat(getComputedStyle(DOM.obstacle).animationDuration);
-        if(currentSpeed > 0.8) {
-           DOM.obstacle.style.animationDuration = (currentSpeed - 0.05) + 's';
+        // Game Makin Cepat Dikit
+        if(state.obstacleSpeed > 0.8) {
+           state.obstacleSpeed -= 0.05;
+           DOM.obstacle.style.animationDuration = state.obstacleSpeed + 's';
         }
       } else {
         btn.classList.add('wrong');
-        // Tunjukkan yang benar
         allBtns.forEach(b => {
           if (b.textContent.trim().toLowerCase() === state.currentQuestion.jawaban.toString().trim().toLowerCase()) {
             b.classList.add('correct');
           }
         });
-        state.lives--;
-        renderLives();
+        state.lives--; renderLives();
       }
       
       updateUI();
       
-      // Jeda 2 detik agar anak bisa melihat jawaban benarnya, lalu lanjut
       setTimeout(() => {
         if (state.lives <= 0) {
           gameOver();
         } else {
-          state.jumpsCount = 0; // Reset hitungan lompatan
-          updateUI();
-          showScreen('game');
+          state.jumpsCount = 0; updateUI();
+          switchScreen(DOM.game);
           resetObstacleAndResume();
         }
-      }, 2000);
-    }
-
-    function handleTimeOut() {
-      // Sama seperti menjawab salah
-      state.lives--;
-      renderLives();
-      
-      const allBtns = document.querySelectorAll('.option-btn');
-      allBtns.forEach(b => {
-          b.disabled = true;
-          if (b.textContent.trim().toLowerCase() === state.currentQuestion.jawaban.toString().trim().toLowerCase()) {
-            b.classList.add('correct');
-          }
-      });
-
-      setTimeout(() => {
-        if (state.lives <= 0) {
-          gameOver();
-        } else {
-          state.jumpsCount = 0;
-          updateUI();
-          showScreen('game');
-          resetObstacleAndResume();
-        }
-      }, 2000);
+      }, 1500);
     }
 
     function updateUI() {
@@ -649,28 +554,21 @@
     function renderLives() {
       const hearts = DOM.lives.children;
       for (let i = 0; i < hearts.length; i++) {
-        if (i < state.lives) {
-          hearts[i].classList.remove('empty');
-        } else {
-          hearts[i].classList.add('empty');
-        }
+        if (i < state.lives) hearts[i].classList.remove('empty');
+        else hearts[i].classList.add('empty');
       }
     }
 
     function gameOver() {
       clearInterval(state.gameLoop);
-      clearInterval(state.timerInterval);
       state.isPaused = true;
       DOM.obstacle.classList.remove('moving');
       DOM.finalScore.textContent = state.score;
-      showScreen('gameOver');
-      
-      // Di sini nanti bisa ditambahkan fungsi untuk mengirim skor (POST) ke Google Sheets
-      // postScore(nama, kelas, score);
+      switchScreen(DOM.gameOver);
     }
 
     function resetGame() {
-      showScreen('start');
+      switchScreen(DOM.start);
     }
 
   </script>
