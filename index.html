@@ -263,19 +263,14 @@
     </div>
   </div>
 
-    <script>
-    // URL Google Apps Script yang baru
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby76NuFNTNRW1C7GzwumaBquwQ0sAu02dJJHTNcVWanswuadjzVo-Uz1PomFKaQ0pk/exec';
-
-    let state = {
-      nama: '', kelas: '', kodeKelas: '',
-      soal: [], soalIndex: 0, skor: 0, nyawa: 3, benar: 0, salah: 0,
-      startTime: 0, isJumping: false, gameLoop: null,
-      obstacleSpeed: 2.5, jumpsToNextQuestion: 3, jumpsCount: 0,
-      isPaused: false, detailJawaban: []
-    };
-
   <script>
+    // ============================================================
+    // GANTI URL DI BAWAH INI dengan URL Web App Apps Script kamu
+    // (Deploy -> Manage deployments -> Web app -> salin URL /exec)
+    // Pastikan "Who has access" = Anyone
+    // ============================================================
+    const API_URL = "GANTI_DENGAN_URL_APPS_SCRIPT_KAMU/exec";
+
     function scaleContainer() {
       const container = document.getElementById('app-container');
       const scale = Math.min(window.innerWidth / 360, window.innerHeight / 640);
@@ -283,8 +278,6 @@
     }
     window.addEventListener('resize', scaleContainer);
     scaleContainer(); 
-
-    const API_URL = "https://script.google.com/macros/s/AKfycby76NuFNTNRW1C7GzwumaBquwQ0sAu02dJJHTNcVWanswuadjzVo-Uz1PomFKaQ0pk/exec";
 
     const DOM = {
       start: document.getElementById('start-screen'),
