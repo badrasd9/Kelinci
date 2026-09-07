@@ -263,6 +263,18 @@
     </div>
   </div>
 
+    <script>
+    // URL Google Apps Script yang baru
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby76NuFNTNRW1C7GzwumaBquwQ0sAu02dJJHTNcVWanswuadjzVo-Uz1PomFKaQ0pk/exec';
+
+    let state = {
+      nama: '', kelas: '', kodeKelas: '',
+      soal: [], soalIndex: 0, skor: 0, nyawa: 3, benar: 0, salah: 0,
+      startTime: 0, isJumping: false, gameLoop: null,
+      obstacleSpeed: 2.5, jumpsToNextQuestion: 3, jumpsCount: 0,
+      isPaused: false, detailJawaban: []
+    };
+
   <script>
     function scaleContainer() {
       const container = document.getElementById('app-container');
